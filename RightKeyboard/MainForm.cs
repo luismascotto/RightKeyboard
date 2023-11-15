@@ -156,7 +156,9 @@ namespace RightKeyboard {
 
 		private void ValidateCurrentDevice(IntPtr hCurrentDevice) {
 			if (!configuration.LanguageMappings.TryGetValue(hCurrentDevice, out var layout)) {
-				selectingLayout = true;
+                configuration.AppendDebugCurrentDevice(hCurrentDevice, devices, new KeyboardDevicesCollection());
+
+                selectingLayout = true;
 				layoutSelectionDialog.ShowDialog();
 				layout = layoutSelectionDialog.Layout;
 				configuration.LanguageMappings.Add(hCurrentDevice, layout);

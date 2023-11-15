@@ -115,7 +115,8 @@ namespace RightKeyboard.Win32 {
 		public static uint GetRawInputData(IntPtr hRawInput, uint uiCommand, out RAWINPUTHEADER data) {
 			int size = Marshal.SizeOf(typeof(RAWINPUTHEADER));
 			IntPtr buffer = Marshal.AllocHGlobal(size);
-			try {
+            try
+            {
 				uint result = GetRawInputData(
 					hRawInput,
 					uiCommand,
@@ -128,7 +129,8 @@ namespace RightKeyboard.Win32 {
 				Marshal.PtrToStructure(buffer, data);
 				return result;
 			}
-			finally {
+            finally
+            {
 				Marshal.FreeHGlobal(buffer);
 			}
 		}

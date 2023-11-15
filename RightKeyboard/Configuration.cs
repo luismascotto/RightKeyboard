@@ -21,7 +21,6 @@ namespace RightKeyboard
 			{
 				using (TextReader input = File.OpenText(configFilePath))
 				{
-
 					var layouts = Layout.EnumerateLayouts().ToDictionary(k => k.Identifier, v => v);
 
 					string line;
@@ -70,5 +69,38 @@ namespace RightKeyboard
 
 			return Path.Combine(configFileDir, "config.txt");
 		}
-	}
+        private static string GetDebugFilePath()
+        {
+            string configFileDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "RightKeyboard");
+            if (!Directory.Exists(configFileDir))
+            {
+                Directory.CreateDirectory(configFileDir);
+            }
+
+            return Path.Combine(configFileDir, "debug.txt");
+        }
+
+        internal void AppendDebugCurrentDevice(IntPtr hCurrentDevice, KeyboardDevicesCollection devices, KeyboardDevicesCollection newDevices)
+        {
+            string configFilePath = GetDebugFilePath();
+            using (TextWriter output = File.AppendText(configFilePath))
+            {
+                output.WriteLine("---");
+                output.WriteLine("Ptr nao encontrado {0}", hCurrentDevice);
+                foreach (var device in devices)
+                {
+                    if (LanguageMappings.TryGetValue(device.Handle, out var layout))
+                    {
+                        output.WriteLine("Handle:{0}\tLayout:{1:X8}\tName:{2}", device.Handle, layout.Identifier.ToInt32(), device.Name);
+                    }
+                }
+                foreach (var device in newDevices)
+                {
+                    output.WriteLine("Handle:{0}\tName:{1}", device.Handle, device.Name);
+                }
+                output.WriteLine("---");
+                output.WriteLine();
+            }
+        }
+    }
 }
