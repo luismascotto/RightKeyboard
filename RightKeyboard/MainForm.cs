@@ -5,6 +5,7 @@ using RightKeyboard.Win32;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.IO;
+using System.Linq;
 
 namespace RightKeyboard {
 	public partial class MainForm : Form {
@@ -155,8 +156,22 @@ namespace RightKeyboard {
 		}
 
 		private void ValidateCurrentDevice(IntPtr hCurrentDevice) {
+			if (hCurrentDevice == IntPtr.Zero)
+			{
+                return;
+			}
 			if (!configuration.LanguageMappings.TryGetValue(hCurrentDevice, out var layout)) {
-                configuration.AppendDebugCurrentDevice(hCurrentDevice, devices, new KeyboardDevicesCollection());
+				var newDevices = new KeyboardDevicesCollection();
+                configuration.AppendDebugCurrentDevice(hCurrentDevice, devices, newDevices);
+
+				var nameCurrDev = newDevices.Where(x => x.Handle == hCurrentDevice).Select(x => x.Name).FirstOrDefault();
+				if(!string.IsNullOrEmpty(nameCurrDev) && devices.TryGetByName(nameCurrDev, out var oldDeviceHandle))
+                {
+                    layout = configuration.LanguageMappings[oldDeviceHandle];
+                    configuration.LanguageMappings.Add(hCurrentDevice, layout);
+                    configuration.LanguageMappings.Remove(oldDeviceHandle);
+                    return;
+				}
 
                 selectingLayout = true;
 				layoutSelectionDialog.ShowDialog();
